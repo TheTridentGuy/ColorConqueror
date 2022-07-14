@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Color Conqueror</title>
+        <style>
+            body {
+                font-family: sans-serif;
+            }
+            .square {
+                height: 3vmin;
+                width: 3vmin;
+                background-color: grey;
+            }
+            tr {
+                margin: 0px;
+                border-collapse: collapse;
+            }
+            .center {
+                margin-left: auto;
+                margin-right: auto;
+            }
+            table {
+                margin-left: auto;
+                margin-right: auto;
+                border-collapse: separate;
+                border-spacing: 0px;
+                align-items: center;
+            }
+            header {  
+                position: static;
+                top: 0;
+                height: 16.5vmin;
+                background: white;
+                text-align: center;
+                border: 2px solid black;
+            }
+            #turnsbg {
+                width: 60vmin;
+                height: 3vmin;
+                background-color: grey;
+                border-radius: 5px;
+            }
+            #turns {
+                width: 50%;
+                height: 100%;
+                float: right;
+                text-align: right;
+                background-color: forestgreen;
+                border-radius: 5px;
+            }
+            .imgframe {
+                float: left;
+                height: 100%;
+                border: none;
+            }
+            div > b {
+                font-size: x-large;
+            }
+            .colorbuts {
+                height: 9vmin;
+                width: 9vmin;
+                border-radius: 2vmin;
+            }
+            /* The Modal (background) */
+            .modal {
+                display: none; /* Hidden by default */
+                position: fixed; /* Stay in place */
+                z-index: 1; /* Sit on top */
+                padding-top: 100px; /* Location of the box */
+                left: 0;
+                top: 0;
+                width: 100%; /* Full width */
+                height: 100%; /* Full height */
+                overflow: auto; /* Enable scroll if needed */
+                background-color: rgb(0,0,0); /* Fallback color */
+                background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            }
+            
+            /* Modal Content */
+            .modal-content {
+                background-color: #fefefe;
+                margin: auto;
+                padding: 20px;
+                border: 1px solid #888;
+                width: 80%;
+            }
+            
+            /* The Close Button */
+            .close {
+                color: #aaaaaa;
+                float: right;
+                font-size: 28px;
+                font-weight: bold;
+            }
+            
+            .close:hover,
+            .close:focus {
+                color: #000;
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+            #logo {
+                height: 15vmin;
+                width: 15vmin;
+            }
+
+            #tab1 {
+                display: block;
+            }
+
+            ul {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+            }
+              
+            li {
+                float: left;
+            }
+              
+            button {
+                display: block;
+                padding: 8px;
+                background-color: #dddddd;
+            }
+        </style>
+        <script>
+            var colors = [
+                "#ff0000",
+                "#ffff00",
+                "#00ff00",
+                "#00ffff",
+                "#0000ff",
+                "#ff00ff",
+            ];
+            var ROWS = 20;
+            var COLS = 20;
+            var MAXTURNS = 50;
+            var startstate;
+            var squares;
+            var newcolor;
+            var oldcolor;
+            var turns;
+            var gameon;
+
+
+            Array.prototype.random = function () {
+                return this[Math.floor((Math.random()*this.length))];
+            }
+
+            function drawscreen(){
+                for(var i=0;i<ROWS;i++){
+                    for(var j=0;j<COLS;j++){
+                        document.getElementById("square" + i + "-" + j).style.backgroundColor = squares[i][j];
+                    }
+                }
+                document.getElementById("turns").style.width = ((turns/MAXTURNS)*100).toString() + "%";
+                document.getElementById("turns").innerHTML = turns + "/" + MAXTURNS;
+            }
+
+            function load(){
+                var winmodal = document.getElementById("winmodal");
+                var winspan = document.getElementsByClassName("close")[0];
+                winspan.onclick = function() {
+                    winmodal.style.display = "none";
+                }
+                window.onclick = function(event) {
+                    if(event.target == winmodal) {
+                        winmodal.style.display = "none";
+                    }
+                }
+                winmodal.style.display = "none";
+                
+                var losemodal = document.getElementById("losemodal");
+                var losespan = document.getElementsByClassName("close")[1];
+                losespan.onclick = function() {
+                    losemodal.style.display = "none";
+                }
+                window.onclick = function(event) {
+                    if(event.target == losemodal) {
+                        losemodal.style.display = "none";
+                    }
+                }
+                losemodal.style.display = "none";
+
+                squares = new Array(ROWS);
+                startstate = new Array(ROWS);
+                for(var k=0;k<ROWS;k++){
+                    squares[k] = new Array(COLS);
+                    startstate[k] = new Array(COLS);
+                }
+                for(var i=0;i<ROWS;i++){
+                    for(var j=0;j<COLS;j++){
+                        squares[i][j] = colors.random();
+                    }
+                }
+                startstate = JSON.stringify(squares);
+                turns = MAXTURNS;
+                oldcolor = squares[0][0];
+                gameon = true;
+                loadCookies();
+                drawscreen();
+                document.getElementById('tab1').style.display = "block";
+                document.getElementById('tab2').style.display = "none";
+            }
+
+            function resetGame(){
+                squares = JSON.parse(startstate);
+                oldcolor = squares[0][0];
+                turns = MAXTURNS;
+                drawscreen();
+                gameon = true;
+                document.getElementById('tab1').style.display = "block";
+                document.getElementById('tab2').style.display = "none";
+            }
+
+            function floodfill(oldcolor, newcolor, x, y){
+                if(oldcolor == newcolor | squares[x][y] != oldcolor){
+                    return
+                }
+
+                squares[x][y] = newcolor;
+
+                if(x > 0) floodfill(oldcolor, newcolor, x-1, y);
+                if(x < (COLS - 1)) floodfill(oldcolor, newcolor, x+1, y);
+                if(y > 0) floodfill(oldcolor, newcolor, x, y-1);
+                if(y < (ROWS - 1)) floodfill(oldcolor, newcolor, x, y+1);
+            }
+
+            function checkwin(){
+                var color = squares[0][0];
+                for(var i=0;i<ROWS;i++){
+                    for(var j=0;j<COLS;j++){
+                        if(squares[i][j] != color) return false
+                    }
+                }
+                return true
+            }
+
+            function turn(color){
+                if(color == oldcolor | !gameon){
+                    return
+                }
+                turns--;
+                floodfill(oldcolor, color, 0, 0);
+                oldcolor = color;
+                drawscreen();
+                if(checkwin()){
+                    gameon = false;
+                    saveCookies();
+                    document.getElementById("winmodal").style.display = "block";
+                    document.getElementById("turnsmod").innerHTML = turns;
+                    document.getElementById("maxturns").innerHTML = MAXTURNS;
+                    return
+                }
+                if(turns == 0){
+                    gameon = false;
+                    document.getElementById("losemodal").style.display = "block";  
+                }
+                saveCookies();
+            }
+
+            function saveCookies(){
+                if(gameon){
+                    setCookie("gameon", "true");
+                }else{
+                    setCookie("gameon", "false");
+                    return
+                }
+                setCookie("startstate", startstate, 365);
+                setCookie("squares", JSON.stringify(squares), 365);
+                setCookie("turns", turns, 365);
+                setCookie("maxturns", MAXTURNS, 365);
+                setCookie("oldcolor", oldcolor, 365)
+                console.log("saving...")
+            }
+
+            function loadCookies(){
+                console.log(getCookie("gameon"))
+                if(getCookie("gameon") != "true"){
+                    console.log("no game on!")
+                    return false
+                }else{
+                    console.log("loading cookies...");
+                    squares = JSON.parse(getCookie("squares"));
+                    console.log("json done!")
+                    startstate = getCookie("startstate");
+                    turns = getCookie("turns");
+                    MAXTURNS = getCookie("maxturns");
+                    oldcolor = getCookie("oldcolor");
+                    return true
+                }
+            }
+
+            function setCookie(cname, cvalue, exdays) {
+                const d = new Date();
+                d.setTime(d.getTime() + (exdays*24*60*60*1000));
+                let expires = "expires="+ d.toUTCString();
+                document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+            }
+
+            function getCookie(cname) {
+                let name = cname + "=";
+                let decodedCookie = decodeURIComponent(document.cookie);
+                let ca = decodedCookie.split(';');
+                for(let i = 0; i <ca.length; i++) {
+                    let c = ca[i];
+                    while (c.charAt(0) == ' ') {
+                        c = c.substring(1);
+                    }
+                    if (c.indexOf(name) == 0) {
+                        return c.substring(name.length, c.length);
+                    }
+                }
+                return "";
+            }
+        </script>
+    </head>
+    <body>
+        <img id="logo" src="cc.png">
+        <div style="float: right; text-align: left;">
+            <b style="color: red;">C</b><b style="color: orange;">o</b><b style="color: yellow;">l</b><b style="color: green;">o</b><b style="color: blue;">r</b>
+            <br>
+            <b>Conqueror</b>
+        </div>
+        <hr>
+        <ul>
+            <li><button onclick="document.getElementById('tab1').style.display = 'block'; document.getElementById('tab2').style.display = 'none';">Game</button></li>
+            <li><button onclick="document.getElementById('tab2').style.display = 'block'; document.getElementById('tab1').style.display = 'none';">Help/Settings</button></li>
+        </ul>
+        <br>
+        <div id="tab1">
+            <table>
+                <tr>
+                    <td class="square" id="square0-0" style="border: 2px solid black;"></td><td class="square" id="square0-1"></td><td class="square" id="square0-2"></td><td class="square" id="square0-3"></td><td class="square" id="square0-4"></td>
+                    <td class="square" id="square0-5"></td><td class="square" id="square0-6"></td><td class="square" id="square0-7"></td><td class="square" id="square0-8"></td><td class="square" id="square0-9"></td>
+                    <td class="square" id="square0-10"></td><td class="square" id="square0-11"></td><td class="square" id="square0-12"></td><td class="square" id="square0-13"></td><td class="square" id="square0-14"></td>
+                    <td class="square" id="square0-15"></td><td class="square" id="square0-16"></td><td class="square" id="square0-17"></td><td class="square" id="square0-18"></td><td class="square" id="square0-19"></td>
+                </tr>
+                <tr>
+                    <td class="square" id="square1-0"></td><td class="square" id="square1-1"></td><td class="square" id="square1-2"></td><td class="square" id="square1-3"></td><td class="square" id="square1-4"></td>
+                    <td class="square" id="square1-5"></td><td class="square" id="square1-6"></td><td class="square" id="square1-7"></td><td class="square" id="square1-8"></td><td class="square" id="square1-9"></td>
+                    <td class="square" id="square1-10"></td><td class="square" id="square1-11"></td><td class="square" id="square1-12"></td><td class="square" id="square1-13"></td><td class="square" id="square1-14"></td>
+                    <td class="square" id="square1-15"></td><td class="square" id="square1-16"></td><td class="square" id="square1-17"></td><td class="square" id="square1-18"></td><td class="square" id="square1-19"></td>
+                </tr>
+                <tr>
+                    <td class="square" id="square2-0"></td><td class="square" id="square2-1"></td><td class="square" id="square2-2"></td><td class="square" id="square2-3"></td><td class="square" id="square2-4"></td>
+                    <td class="square" id="square2-5"></td><td class="square" id="square2-6"></td><td class="square" id="square2-7"></td><td class="square" id="square2-8"></td><td class="square" id="square2-9"></td>
+                    <td class="square" id="square2-10"></td><td class="square" id="square2-11"></td><td class="square" id="square2-12"></td><td class="square" id="square2-13"></td><td class="square" id="square2-14"></td>
+                    <td class="square" id="square2-15"></td><td class="square" id="square2-16"></td><td class="square" id="square2-17"></td><td class="square" id="square2-18"></td><td class="square" id="square2-19"></td>
+                </tr>
+                <tr>
+                    <td class="square" id="square3-0"></td><td class="square" id="square3-1"></td><td class="square" id="square3-2"></td><td class="square" id="square3-3"></td><td class="square" id="square3-4"></td>
+                    <td class="square" id="square3-5"></td><td class="square" id="square3-6"></td><td class="square" id="square3-7"></td><td class="square" id="square3-8"></td><td class="square" id="square3-9"></td>
+                    <td class="square" id="square3-10"></td><td class="square" id="square3-11"></td><td class="square" id="square3-12"></td><td class="square" id="square3-13"></td><td class="square" id="square3-14"></td>
+                    <td class="square" id="square3-15"></td><td class="square" id="square3-16"></td><td class="square" id="square3-17"></td><td class="square" id="square3-18"></td><td class="square" id="square3-19"></td>
+                </tr>
+                <tr>
+                    <td class="square" id="square4-0"></td><td class="square" id="square4-1"></td><td class="square" id="square4-2"></td><td class="square" id="square4-3"></td><td class="square" id="square4-4"></td>
+                    <td class="square" id="square4-5"></td><td class="square" id="square4-6"></td><td class="square" id="square4-7"></td><td class="square" id="square4-8"></td><td class="square" id="square4-9"></td>
+                    <td class="square" id="square4-10"></td><td class="square" id="square4-11"></td><td class="square" id="square4-12"></td><td class="square" id="square4-13"></td><td class="square" id="square4-14"></td>
+                    <td class="square" id="square4-15"></td><td class="square" id="square4-16"></td><td class="square" id="square4-17"></td><td class="square" id="square4-18"></td><td class="square" id="square4-19"></td>
+                </tr>
+                <tr>
+                    <td class="square" id="square5-0"></td><td class="square" id="square5-1"></td><td class="square" id="square5-2"></td><td class="square" id="square5-3"></td><td class="square" id="square5-4"></td>
+                    <td class="square" id="square5-5"></td><td class="square" id="square5-6"></td><td class="square" id="square5-7"></td><td class="square" id="square5-8"></td><td class="square" id="square5-9"></td>
+                    <td class="square" id="square5-10"></td><td class="square" id="square5-11"></td><td class="square" id="square5-12"></td><td class="square" id="square5-13"></td><td class="square" id="square5-14"></td>
+                    <td class="square" id="square5-15"></td><td class="square" id="square5-16"></td><td class="square" id="square5-17"></td><td class="square" id="square5-18"></td><td class="square" id="square5-19"></td>
+                </tr>
+                <tr>
+                    <td class="square" id="square6-0"></td><td class="square" id="square6-1"></td><td class="square" id="square6-2"></td><td class="square" id="square6-3"></td><td class="square" id="square6-4"></td>
+                    <td class="square" id="square6-5"></td><td class="square" id="square6-6"></td><td class="square" id="square6-7"></td><td class="square" id="square6-8"></td><td class="square" id="square6-9"></td>
+                    <td class="square" id="square6-10"></td><td class="square" id="square6-11"></td><td class="square" id="square6-12"></td><td class="square" id="square6-13"></td><td class="square" id="square6-14"></td>
+                    <td class="square" id="square6-15"></td><td class="square" id="square6-16"></td><td class="square" id="square6-17"></td><td class="square" id="square6-18"></td><td class="square" id="square6-19"></td>
+                </tr>
+                <tr>
+                    <td class="square" id="square7-0"></td><td class="square" id="square7-1"></td><td class="square" id="square7-2"></td><td class="square" id="square7-3"></td><td class="square" id="square7-4"></td>
+                    <td class="square" id="square7-5"></td><td class="square" id="square7-6"></td><td class="square" id="square7-7"></td><td class="square" id="square7-8"></td><td class="square" id="square7-9"></td>
+                    <td class="square" id="square7-10"></td><td class="square" id="square7-11"></td><td class="square" id="square7-12"></td><td class="square" id="square7-13"></td><td class="square" id="square7-14"></td>
+                    <td class="square" id="square7-15"></td><td class="square" id="square7-16"></td><td class="square" id="square7-17"></td><td class="square" id="square7-18"></td><td class="square" id="square7-19"></td>
+                </tr>
+                <tr>
+                    <td class="square" id="square8-0"></td><td class="square" id="square8-1"></td><td class="square" id="square8-2"></td><td class="square" id="square8-3"></td><td class="square" id="square8-4"></td>
+                    <td class="square" id="square8-5"></td><td class="square" id="square8-6"></td><td class="square" id="square8-7"></td><td class="square" id="square8-8"></td><td class="square" id="square8-9"></td>
+                    <td class="square" id="square8-10"></td><td class="square" id="square8-11"></td><td class="square" id="square8-12"></td><td class="square" id="square8-13"></td><td class="square" id="square8-14"></td>
+                    <td class="square" id="square8-15"></td><td class="square" id="square8-16"></td><td class="square" id="square8-17"></td><td class="square" id="square8-18"></td><td class="square" id="square8-19"></td>
+                </tr>
+                <tr>
+                    <td class="square" id="square9-0"></td><td class="square" id="square9-1"></td><td class="square" id="square9-2"></td><td class="square" id="square9-3"></td><td class="square" id="square9-4"></td>
+                    <td class="square" id="square9-5"></td><td class="square" id="square9-6"></td><td class="square" id="square9-7"></td><td class="square" id="square9-8"></td><td class="square" id="square9-9"></td>
+                    <td class="square" id="square9-10"></td><td class="square" id="square9-11"></td><td class="square" id="square9-12"></td><td class="square" id="square9-13"></td><td class="square" id="square9-14"></td>
+                    <td class="square" id="square9-15"></td><td class="square" id="square9-16"></td><td class="square" id="square9-17"></td><td class="square" id="square9-18"></td><td class="square" id="square9-19"></td>
+                </tr>
+                <tr>
+                    <td class="square" id="square10-0"></td><td class="square" id="square10-1"></td><td class="square" id="square10-2"></td><td class="square" id="square10-3"></td><td class="square" id="square10-4"></td>
+                    <td class="square" id="square10-5"></td><td class="square" id="square10-6"></td><td class="square" id="square10-7"></td><td class="square" id="square10-8"></td><td class="square" id="square10-9"></td>
+                    <td class="square" id="square10-10"></td><td class="square" id="square10-11"></td><td class="square" id="square10-12"></td><td class="square" id="square10-13"></td><td class="square" id="square10-14"></td>
+                    <td class="square" id="square10-15"></td><td class="square" id="square10-16"></td><td class="square" id="square10-17"></td><td class="square" id="square10-18"></td><td class="square" id="square10-19"></td>
+                </tr>
+                <tr>
+                    <td class="square" id="square11-0"></td><td class="square" id="square11-1"></td><td class="square" id="square11-2"></td><td class="square" id="square11-3"></td><td class="square" id="square11-4"></td>
+                    <td class="square" id="square11-5"></td><td class="square" id="square11-6"></td><td class="square" id="square11-7"></td><td class="square" id="square11-8"></td><td class="square" id="square11-9"></td>
+                    <td class="square" id="square11-10"></td><td class="square" id="square11-11"></td><td class="square" id="square11-12"></td><td class="square" id="square11-13"></td><td class="square" id="square11-14"></td>
+                    <td class="square" id="square11-15"></td><td class="square" id="square11-16"></td><td class="square" id="square11-17"></td><td class="square" id="square11-18"></td><td class="square" id="square11-19"></td>
+                </tr>
+                <tr>
+                    <td class="square" id="square12-0"></td><td class="square" id="square12-1"></td><td class="square" id="square12-2"></td><td class="square" id="square12-3"></td><td class="square" id="square12-4"></td>
+                    <td class="square" id="square12-5"></td><td class="square" id="square12-6"></td><td class="square" id="square12-7"></td><td class="square" id="square12-8"></td><td class="square" id="square12-9"></td>
+                    <td class="square" id="square12-10"></td><td class="square" id="square12-11"></td><td class="square" id="square12-12"></td><td class="square" id="square12-13"></td><td class="square" id="square12-14"></td>
+                    <td class="square" id="square12-15"></td><td class="square" id="square12-16"></td><td class="square" id="square12-17"></td><td class="square" id="square12-18"></td><td class="square" id="square12-19"></td>
+                </tr>
+                <tr>
+                    <td class="square" id="square13-0"></td><td class="square" id="square13-1"></td><td class="square" id="square13-2"></td><td class="square" id="square13-3"></td><td class="square" id="square13-4"></td>
+                    <td class="square" id="square13-5"></td><td class="square" id="square13-6"></td><td class="square" id="square13-7"></td><td class="square" id="square13-8"></td><td class="square" id="square13-9"></td>
+                    <td class="square" id="square13-10"></td><td class="square" id="square13-11"></td><td class="square" id="square13-12"></td><td class="square" id="square13-13"></td><td class="square" id="square13-14"></td>
+                    <td class="square" id="square13-15"></td><td class="square" id="square13-16"></td><td class="square" id="square13-17"></td><td class="square" id="square13-18"></td><td class="square" id="square13-19"></td>
+                </tr>
+                <tr>
+                    <td class="square" id="square14-0"></td><td class="square" id="square14-1"></td><td class="square" id="square14-2"></td><td class="square" id="square14-3"></td><td class="square" id="square14-4"></td>
+                    <td class="square" id="square14-5"></td><td class="square" id="square14-6"></td><td class="square" id="square14-7"></td><td class="square" id="square14-8"></td><td class="square" id="square14-9"></td>
+                    <td class="square" id="square14-10"></td><td class="square" id="square14-11"></td><td class="square" id="square14-12"></td><td class="square" id="square14-13"></td><td class="square" id="square14-14"></td>
+                    <td class="square" id="square14-15"></td><td class="square" id="square14-16"></td><td class="square" id="square14-17"></td><td class="square" id="square14-18"></td><td class="square" id="square14-19"></td>
+                </tr>
+                <tr>
+                    <td class="square" id="square15-0"></td><td class="square" id="square15-1"></td><td class="square" id="square15-2"></td><td class="square" id="square15-3"></td><td class="square" id="square15-4"></td>
+                    <td class="square" id="square15-5"></td><td class="square" id="square15-6"></td><td class="square" id="square15-7"></td><td class="square" id="square15-8"></td><td class="square" id="square15-9"></td>
+                    <td class="square" id="square15-10"></td><td class="square" id="square15-11"></td><td class="square" id="square15-12"></td><td class="square" id="square15-13"></td><td class="square" id="square15-14"></td>
+                    <td class="square" id="square15-15"></td><td class="square" id="square15-16"></td><td class="square" id="square15-17"></td><td class="square" id="square15-18"></td><td class="square" id="square15-19"></td>
+                </tr>
+                <tr>
+                    <td class="square" id="square16-0"></td><td class="square" id="square16-1"></td><td class="square" id="square16-2"></td><td class="square" id="square16-3"></td><td class="square" id="square16-4"></td>
+                    <td class="square" id="square16-5"></td><td class="square" id="square16-6"></td><td class="square" id="square16-7"></td><td class="square" id="square16-8"></td><td class="square" id="square16-9"></td>
+                    <td class="square" id="square16-10"></td><td class="square" id="square16-11"></td><td class="square" id="square16-12"></td><td class="square" id="square16-13"></td><td class="square" id="square16-14"></td>
+                    <td class="square" id="square16-15"></td><td class="square" id="square16-16"></td><td class="square" id="square16-17"></td><td class="square" id="square16-18"></td><td class="square" id="square16-19"></td>
+                </tr>
+                <tr>
+                    <td class="square" id="square17-0"></td><td class="square" id="square17-1"></td><td class="square" id="square17-2"></td><td class="square" id="square17-3"></td><td class="square" id="square17-4"></td>
+                    <td class="square" id="square17-5"></td><td class="square" id="square17-6"></td><td class="square" id="square17-7"></td><td class="square" id="square17-8"></td><td class="square" id="square17-9"></td>
+                    <td class="square" id="square17-10"></td><td class="square" id="square17-11"></td><td class="square" id="square17-12"></td><td class="square" id="square17-13"></td><td class="square" id="square17-14"></td>
+                    <td class="square" id="square17-15"></td><td class="square" id="square17-16"></td><td class="square" id="square17-17"></td><td class="square" id="square17-18"></td><td class="square" id="square17-19"></td>
+                </tr>
+                <tr>
+                    <td class="square" id="square18-0"></td><td class="square" id="square18-1"></td><td class="square" id="square18-2"></td><td class="square" id="square18-3"></td><td class="square" id="square18-4"></td>
+                    <td class="square" id="square18-5"></td><td class="square" id="square18-6"></td><td class="square" id="square18-7"></td><td class="square" id="square18-8"></td><td class="square" id="square18-9"></td>
+                    <td class="square" id="square18-10"></td><td class="square" id="square18-11"></td><td class="square" id="square18-12"></td><td class="square" id="square18-13"></td><td class="square" id="square18-14"></td>
+                    <td class="square" id="square18-15"></td><td class="square" id="square18-16"></td><td class="square" id="square18-17"></td><td class="square" id="square18-18"></td><td class="square" id="square18-19"></td>
+                </tr>
+                <tr>
+                    <td class="square" id="square19-0"></td><td class="square" id="square19-1"></td><td class="square" id="square19-2"></td><td class="square" id="square19-3"></td><td class="square" id="square19-4"></td>
+                    <td class="square" id="square19-5"></td><td class="square" id="square19-6"></td><td class="square" id="square19-7"></td><td class="square" id="square19-8"></td><td class="square" id="square19-9"></td>
+                    <td class="square" id="square19-10"></td><td class="square" id="square19-11"></td><td class="square" id="square19-12"></td><td class="square" id="square19-13"></td><td class="square" id="square19-14"></td>
+                    <td class="square" id="square19-15"></td><td class="square" id="square19-16"></td><td class="square" id="square19-17"></td><td class="square" id="square19-18"></td><td class="square" id="square19-19"></td>
+                </tr>
+            </table>
+            <p style="text-align: center;">Turns Remaining:</p>
+            <div style="width: 60vmin; margin-left: auto; margin-right: auto;">
+                <div id="turnsbg">
+                    <div id="turns">
+                        50/50
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div>
+                <table>
+                    <tr>
+                        <td class="colorbuts" style="background-color: #ff0000; padding: 1vmin;" onclick="turn('#ff0000');"></td>
+                        <td class="colorbuts" style="background-color: #ffff00; padding: 1vmin;" onclick="turn('#ffff00');"></td>
+                        <td class="colorbuts" style="background-color: #00ff00; padding: 1vmin;" onclick="turn('#00ff00');"></td>
+                        <td class="colorbuts" style="background-color: #00ffff; padding: 1vmin;" onclick="turn('#00ffff');"></td>
+                        <td class="colorbuts" style="background-color: #0000ff; padding: 1vmin;" onclick="turn('#0000ff');"></td>
+                        <td class="colorbuts" style="background-color: #ff00ff; padding: 1vmin;" onclick="turn('#ff00ff');"></td>  
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div id="tab2">
+            <div style="text-align: center;">
+                Instructions...
+            </div>
+            <button style="margin-left: auto; margin-right: auto;" onclick="load();">New Game</button>
+            <button style="margin-left: auto; margin-right: auto;" onclick="resetGame();">Reset Game</button>
+            
+        </div>
+        <div id="winmodal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>You Win!</h2>
+                <blockquote>
+                    Congrats! You conquered the board with <b id="turnsmod"></b> out of <b id="maxturns"></b> turns remaining!
+                </blockquote>
+                <button onclick="load();">Play Again!</button>
+            </div>
+        </div>
+        <div id="losemodal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>You Lose!</h2>
+                <blockquote>
+                    Darn! Tough one!
+                </blockquote>
+                <button onclick="load();">Play Again!</button>
+            </div>
+        </div>
+        <script>
+            load();
+        </script>
+    </body>
+</html>
