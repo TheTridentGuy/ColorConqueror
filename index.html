@@ -150,6 +150,9 @@
             var oldcolor;
             var turns;
             var gameon;
+            var streak = 0;
+            var wins = 0;
+            var losses = 0;
             var frame = 1;
 
 
@@ -209,6 +212,7 @@
                 gameon = true;
                 loadCookies();
                 drawscreen();
+                showstats();
                 document.getElementById('tab1').style.display = "block";
                 document.getElementById('tab2').style.display = "none";
             }
@@ -249,6 +253,7 @@
 
             function turn(color){
                 if(color == oldcolor | !gameon){
+                    showstats();
                     return
                 }
                 turns--;
@@ -257,17 +262,29 @@
                 drawscreen();
                 if(checkwin()){
                     gameon = false;
-                    saveCookies();
                     document.getElementById("winmodal").style.display = "block";
                     document.getElementById("turnsmod").innerHTML = MAXTURNS - turns;
                     document.getElementById("maxturns").innerHTML = MAXTURNS;
+                    streak++;
+                    wins++;
+                    saveCookies();
+                    showstats();
                     return
                 }
                 if(turns == 0){
                     gameon = false;
-                    document.getElementById("losemodal").style.display = "block";  
+                    document.getElementById("losemodal").style.display = "block";
+                    losses++;
+                    streak = 0; 
                 }
                 saveCookies();
+                showstats();
+            }
+
+            function showstats(){
+                let statstr;
+                statstr = "wins: " + wins + " losses: " + losses + " streak: " + streak;
+                document.getElementById("stats").innerHTML = statstr;
             }
 
             function saveCookies(){
@@ -281,23 +298,24 @@
                 setCookie("squares", JSON.stringify(squares), 365);
                 setCookie("turns", turns, 365);
                 setCookie("maxturns", MAXTURNS, 365);
-                setCookie("oldcolor", oldcolor, 365)
-                console.log("saving...")
+                setCookie("oldcolor", oldcolor, 365);
+                setCookie("wins", wins, 365);
+                setCookie("losses", losses, 365);
+                setCookie("streak", streak, 365);
             }
 
             function loadCookies(){
-                console.log(getCookie("gameon"))
                 if(getCookie("gameon") != "true"){
-                    console.log("no game on!")
                     return false
                 }else{
-                    console.log("loading cookies...");
                     squares = JSON.parse(getCookie("squares"));
-                    console.log("json done!")
                     startstate = getCookie("startstate");
                     turns = getCookie("turns");
                     MAXTURNS = getCookie("maxturns");
                     oldcolor = getCookie("oldcolor");
+                    wins = getCookie("wins");
+                    losses = getCookie("losses");
+                    streak = getCookie("streak");
                     return true
                 }
             }
@@ -519,6 +537,12 @@
                 <br>
                 <img id="anime" src="1.png">
                 <button style="margin-left: auto; margin-right: auto;" onclick="setTimeout('animate()', 1500);">Animate Demo</button>
+                <br>
+                <div id="statsdiv">
+                    <b>Stats:</b>
+                    <br>
+                    <span id="stats"></span>
+                </div>
             </div>
             <hr>
             <button style="margin-left: auto; margin-right: auto;" onclick="load();">New Game</button>
