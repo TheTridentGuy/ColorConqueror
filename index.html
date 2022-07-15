@@ -126,6 +126,11 @@
                 padding: 8px;
                 background-color: #dddddd;
             }
+
+            #anime{
+                height: 75vmin;
+                width: 75vmin;
+            }
         </style>
         <script>
             var colors = [
@@ -145,6 +150,7 @@
             var oldcolor;
             var turns;
             var gameon;
+            var frame = 1;
 
 
             Array.prototype.random = function () {
@@ -215,6 +221,7 @@
                 gameon = true;
                 document.getElementById('tab1').style.display = "block";
                 document.getElementById('tab2').style.display = "none";
+                document.getElementById("losemodal").style.display = "none";
             }
 
             function floodfill(oldcolor, newcolor, x, y){
@@ -252,7 +259,7 @@
                     gameon = false;
                     saveCookies();
                     document.getElementById("winmodal").style.display = "block";
-                    document.getElementById("turnsmod").innerHTML = turns;
+                    document.getElementById("turnsmod").innerHTML = MAXTURNS - turns;
                     document.getElementById("maxturns").innerHTML = MAXTURNS;
                     return
                 }
@@ -300,6 +307,18 @@
                 d.setTime(d.getTime() + (exdays*24*60*60*1000));
                 let expires = "expires="+ d.toUTCString();
                 document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+            }
+
+            function animate(){
+                if(frame == 5){
+                    frame = 1
+                    document.getElementById("anime").src = "1.png";
+                    return
+                }else{
+                    frame++;
+                    document.getElementById("anime").src = frame + ".png";
+                    setTimeout("animate()", 1500);
+                }
             }
 
             function getCookie(cname) {
@@ -476,11 +495,32 @@
                     </tr>
                 </table>
             </div>
+            <br>
+            <span style="margin-top: auto; text-align: center;">Like Color Conqueror? <a>Share it!</a></span>
         </div>
         <div id="tab2">
             <div style="text-align: center;">
-                Instructions...
+                <b>How To Play:</b>
+                <br>
+                <blockquote>
+                    The goal of Color Conqueror is to fill in 
+                    the entire board in one color. This is achieved
+                    by changing the color of the top-left square. when
+                    the color of the top-left square changes all the
+                    squares of the same color that are connected to the
+                    top-left square also change color.
+                </blockquote>
+                <b>Demo:</b>
+                <br>
+                <blockquote>
+                    This demo shows how a 4x4 grid might be 
+                    conquered.
+                </blockquote>
+                <br>
+                <img id="anime" src="1.png">
+                <button style="margin-left: auto; margin-right: auto;" onclick="setTimeout('animate()', 1500);">Animate Demo</button>
             </div>
+            <hr>
             <button style="margin-left: auto; margin-right: auto;" onclick="load();">New Game</button>
             <button style="margin-left: auto; margin-right: auto;" onclick="resetGame();">Reset Game</button>
             
@@ -490,7 +530,7 @@
                 <span class="close">&times;</span>
                 <h2>You Win!</h2>
                 <blockquote>
-                    Congrats! You conquered the board with <b id="turnsmod"></b> out of <b id="maxturns"></b> turns remaining!
+                    Congrats! You conquered the board in <b id="turnsmod"></b> out of <b id="maxturns"></b> turns!
                 </blockquote>
                 <button onclick="load();">Play Again!</button>
             </div>
@@ -502,7 +542,10 @@
                 <blockquote>
                     Darn! Tough one!
                 </blockquote>
-                <button onclick="load();">Play Again!</button>
+                <div style="display: inline-block;">
+                    <button onclick="load();">Play Again!</button>
+                    <button onclick="resetGame();">Reset Level</button>
+                </div>
             </div>
         </div>
         <script>
