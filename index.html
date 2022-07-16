@@ -125,6 +125,7 @@
                 display: block;
                 padding: 8px;
                 background-color: #dddddd;
+                font-size: x-large;
             }
 
             #anime{
@@ -302,6 +303,7 @@
                 setCookie("wins", wins, 365);
                 setCookie("losses", losses, 365);
                 setCookie("streak", streak, 365);
+                console.log(document.cookie);
             }
 
             function loadCookies(){
@@ -316,11 +318,12 @@
                     wins = getCookie("wins");
                     losses = getCookie("losses");
                     streak = getCookie("streak");
+                    console.log(wins, losses, streak)
                     return true
                 }
             }
 
-            function setCookie(cname, cvalue, exdays) {
+            function setCookie(cname, cvalue, exdays=365) {
                 const d = new Date();
                 d.setTime(d.getTime() + (exdays*24*60*60*1000));
                 let expires = "expires="+ d.toUTCString();
@@ -515,7 +518,7 @@
             </div>
             <br>
             <span style="margin-top: auto; text-align: center;">Like Color Conqueror? <a id="message" href="sms:&body='Check out thid game: https://thetridentguy.github.io/ColorConqueror/'">Share it!</a></span>
-            
+
         </div>
         <div id="tab2">
             <div style="text-align: center;">
