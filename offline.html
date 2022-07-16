@@ -204,6 +204,18 @@
                     }
                 }
                 losemodal.style.display = "none";
+                document.getElementById("message").addEventListener('click', event => {
+                    try{
+                        if (navigator.share) {
+                            navigator.share({
+                                title: "Color Conqueror Game:",
+                                url: "https://thetridentguy.github.io/ColorConqueror/"
+                            });
+                        }
+                    }catch{
+                        console.log("Share error");
+                    }
+                });
 
                 squares = new Array(ROWS);
                 startstate = new Array(ROWS);
@@ -530,7 +542,7 @@
                 </table>
             </div>
             <br>
-            <span style="margin-top: auto; text-align: center;">Like Color Conqueror? <a id="message" href="sms:&body='Check out thid game: https://thetridentguy.github.io/ColorConqueror/'">Share it!</a></span>
+            <span style="margin-top: auto; text-align: center;">Like Color Conqueror? <a id="message" style="text-decoration: underline; color: #0000ff;">Share it!</a></span>
 
         </div>
         <div id="tab2">
