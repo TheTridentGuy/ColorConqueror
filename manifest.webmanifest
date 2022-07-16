@@ -1,0 +1,17 @@
+{
+    "name": "Color Conqueror",
+    "short_name": "CC",
+    "description": "Color Conqueror game.",
+    "scope": "/ColorConqueror/",
+    "start_url": "/ColorConqueror/",
+    "background_color": "#ffffff",
+    "theme_color": "#ffffff",
+    "display": "standalone", 
+    "icons": [
+        {
+          "src": "/ColorConqueror/cc.png",
+          "type": "image/png",
+          "sizes": "700x700"
+        }
+    ]
+  }
