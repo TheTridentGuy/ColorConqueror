@@ -154,6 +154,7 @@
             var streak = 0;
             var wins = 0;
             var losses = 0;
+            var best = Infinity;
             var frame = 1;
 
 
@@ -268,6 +269,9 @@
                     document.getElementById("maxturns").innerHTML = MAXTURNS;
                     streak++;
                     wins++;
+                    if((MAXTURNS - turns) < best){
+                        best = (MAXTURNS - turns);
+                    }
                     saveCookies();
                     showstats();
                     return
@@ -284,7 +288,7 @@
 
             function showstats(){
                 let statstr;
-                statstr = "wins: " + wins + " losses: " + losses + " streak: " + streak + " w/l: " + wins/losses;
+                statstr = "Wins: " + wins + " Losses: " + losses + " Streak: " + streak + " W/L: " + (losses==0?wins:wins/losses) + " Lowest # of turns: " + best;
                 document.getElementById("stats").innerHTML = statstr;
             }
 
@@ -293,7 +297,6 @@
                     setCookie("gameon", "true");
                 }else{
                     setCookie("gameon", "false");
-                    return
                 }
                 setCookie("startstate", startstate, 365);
                 setCookie("squares", JSON.stringify(squares), 365);
@@ -303,10 +306,15 @@
                 setCookie("wins", wins, 365);
                 setCookie("losses", losses, 365);
                 setCookie("streak", streak, 365);
-                console.log(document.cookie);
+                setCookie("best", best, 365);
+                console.log("save...", wins, losses, streak);
             }
 
             function loadCookies(){
+                wins = getCookie("wins");
+                losses = getCookie("losses");
+                streak = getCookie("streak");
+                best = getCookie("best");
                 if(getCookie("gameon") != "true"){
                     return false
                 }else{
@@ -315,10 +323,7 @@
                     turns = getCookie("turns");
                     MAXTURNS = getCookie("maxturns");
                     oldcolor = getCookie("oldcolor");
-                    wins = getCookie("wins");
-                    losses = getCookie("losses");
-                    streak = getCookie("streak");
-                    console.log(wins, losses, streak)
+                    console.log("load...", wins, losses, streak)
                     return true
                 }
             }
