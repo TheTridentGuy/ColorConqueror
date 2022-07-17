@@ -180,7 +180,7 @@
                 document.getElementById("turns").innerHTML = turns + "/" + MAXTURNS;
             }
 
-            function load(){
+            function load(cookieload=true){
                 var winmodal = document.getElementById("winmodal");
                 var winspan = document.getElementsByClassName("close")[0];
                 winspan.onclick = function() {
@@ -232,7 +232,9 @@
                 turns = MAXTURNS;
                 oldcolor = squares[0][0];
                 gameon = true;
-                loadCookies();
+                if(cookieload){
+                    loadCookies();
+                }
                 drawscreen();
                 showstats();
                 document.getElementById('tab1').style.display = "block";
