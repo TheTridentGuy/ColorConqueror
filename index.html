@@ -239,6 +239,19 @@
                 document.getElementById('tab2').style.display = "none";
             }
 
+            function sharecc(){
+                try{
+                    if (navigator.share) {
+                        navigator.share({
+                            text: "I conquered a random Color Conqueror in " + (MAXTURNS - turns) + " out of " + MAXTURNS + " turns!" +
+                            "\nhttps://thetridentguy.github.io/ColorConqueror/"
+                        });
+                    }
+                }catch{
+                    console.log("Share error");
+                }
+            }
+
             function resetGame(){
                 squares = JSON.parse(startstate);
                 oldcolor = squares[0][0];
@@ -586,6 +599,7 @@
                     Congrats! You conquered the board in <b id="turnsmod"></b> out of <b id="maxturns"></b> turns!
                 </blockquote>
                 <button onclick="load();">Play Again!</button>
+                <button onclick="sharecc()">Share</button>
             </div>
         </div>
         <div id="losemodal" class="modal">

@@ -1,6 +1,6 @@
 {
     "name": "Color Conqueror",
-    "short_name": "CC",
+    "short_name": "Color Conqueror",
     "description": "Color Conqueror game.",
     "scope": "/ColorConqueror/",
     "start_url": "/ColorConqueror/",
