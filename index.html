@@ -314,6 +314,9 @@
                     document.getElementById("losemodal").style.display = "block";
                     losses++;
                     streak = 0; 
+                    if((MAXTURNS - turns) < best){
+                        best = (MAXTURNS - turns);
+                    }
                 }
                 saveCookies();
                 showstats();
@@ -336,10 +339,10 @@
                 setCookie("turns", turns, 365);
                 setCookie("maxturns", MAXTURNS, 365);
                 setCookie("oldcolor", oldcolor, 365);
+                setCookie("best", best, 365);
                 setCookie("wins", wins, 365);
                 setCookie("losses", losses, 365);
                 setCookie("streak", streak, 365);
-                setCookie("best", best, 365);
                 console.log("save...", wins, losses, streak);
             }
 
@@ -348,6 +351,10 @@
                 losses = getCookie("losses");
                 streak = getCookie("streak");
                 best = getCookie("best");
+                wins = wins!=""?wins:0;
+                losses = losses!=""?losses:0;
+                streak = streak!=""?streak:0;
+                best = best!=""?best:0;
                 if(getCookie("gameon") != "true"){
                     return false
                 }else{
