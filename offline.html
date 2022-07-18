@@ -180,7 +180,7 @@
                 document.getElementById("turns").innerHTML = turns + "/" + MAXTURNS;
             }
 
-            function load(){
+            function load(cookieload=true){
                 var winmodal = document.getElementById("winmodal");
                 var winspan = document.getElementsByClassName("close")[0];
                 winspan.onclick = function() {
@@ -232,11 +232,26 @@
                 turns = MAXTURNS;
                 oldcolor = squares[0][0];
                 gameon = true;
-                loadCookies();
+                if(cookieload){
+                    loadCookies();
+                }
                 drawscreen();
                 showstats();
                 document.getElementById('tab1').style.display = "block";
                 document.getElementById('tab2').style.display = "none";
+            }
+
+            function sharecc(){
+                try{
+                    if (navigator.share) {
+                        navigator.share({
+                            text: "I conquered a random Color Conqueror in " + (MAXTURNS - turns) + " out of " + MAXTURNS + " turns!" +
+                            "\nhttps://thetridentguy.github.io/ColorConqueror/"
+                        });
+                    }
+                }catch{
+                    console.log("Share error");
+                }
             }
 
             function resetGame(){
@@ -301,6 +316,9 @@
                     document.getElementById("losemodal").style.display = "block";
                     losses++;
                     streak = 0; 
+                    if((MAXTURNS - turns) < best){
+                        best = (MAXTURNS - turns);
+                    }
                 }
                 saveCookies();
                 showstats();
@@ -323,10 +341,10 @@
                 setCookie("turns", turns, 365);
                 setCookie("maxturns", MAXTURNS, 365);
                 setCookie("oldcolor", oldcolor, 365);
+                setCookie("best", best, 365);
                 setCookie("wins", wins, 365);
                 setCookie("losses", losses, 365);
                 setCookie("streak", streak, 365);
-                setCookie("best", best, 365);
                 console.log("save...", wins, losses, streak);
             }
 
@@ -335,6 +353,10 @@
                 losses = getCookie("losses");
                 streak = getCookie("streak");
                 best = getCookie("best");
+                wins = wins!=""?wins:0;
+                losses = losses!=""?losses:0;
+                streak = streak!=""?streak:0;
+                best = best!=""?best:Infinity;
                 if(getCookie("gameon") != "true"){
                     return false
                 }else{
@@ -382,6 +404,16 @@
                 }
                 return "";
             }
+
+            function tab1(){
+                document.getElementById('tab1').style.display = "block";
+                document.getElementById('tab2').style.display = "none";
+            }
+
+            function tab2(){
+                document.getElementById('tab2').style.display = "block";
+                document.getElementById('tab1').style.display = "none";
+            }
         </script>
     </head>
     <body>
@@ -393,8 +425,8 @@
         </div>
         <hr>
         <ul>
-            <li><button onclick="document.getElementById('tab1').style.display = 'block'; document.getElementById('tab2').style.display = 'none';">Game</button></li>
-            <li><button onclick="document.getElementById('tab2').style.display = 'block'; document.getElementById('tab1').style.display = 'none';">Help/Settings</button></li>
+            <li><button onclick="tab1();">Game</button></li>
+            <li><button onclick="tab2();">Help/Settings</button></li>
         </ul>
         <br>
         <div id="tab1">
@@ -551,8 +583,8 @@
                 <br>
                 <blockquote>
                     The goal of Color Conqueror is to fill in 
-                    the entire board in one color. This is achieved
-                    by changing the color of the top-left square. when
+                    the entire board in one color before running out of turns. 
+                    This is achieved by changing the color of the top-left square. when
                     the color of the top-left square changes all the
                     squares of the same color that are connected to the
                     top-left square also change color.
@@ -561,7 +593,9 @@
                 <br>
                 <blockquote>
                     This demo shows how a 4x4 grid might be 
-                    conquered.
+                    conquered. In in the color of the top left square changes
+                    from red to green to red to blue to green. At this point the 
+                    board has been filled in green. Click "Animate Demo" to see.
                 </blockquote>
                 <br>
                 <img id="anime" src="1.png">
@@ -586,6 +620,7 @@
                     Congrats! You conquered the board in <b id="turnsmod"></b> out of <b id="maxturns"></b> turns!
                 </blockquote>
                 <button onclick="load();">Play Again!</button>
+                <button onclick="sharecc()">Share</button>
             </div>
         </div>
         <div id="losemodal" class="modal">
